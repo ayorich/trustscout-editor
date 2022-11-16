@@ -1,31 +1,99 @@
-import { ReactElement } from 'react';
-import MUIRichTextEditor from 'mui-rte';
+import React, { FunctionComponent, useRef } from 'react';
+import MUIRichTextEditor, {
+  TMUIRichTextEditorRef,
+  TAsyncAtomicBlockResponse,
+} from 'mui-rte';
+import { Button, Typography } from '@mui/material';
 import InvertColorsIcon from '@mui/icons-material/InvertColors';
-import './Editor.css';
+import AbcTwoTone from '@mui/icons-material/AbcTwoTone';
 
-export default function Editor(): ReactElement {
-  const save = (data: string) => {
-    console.log(data);
+const save = (data: string) => {
+  console.log(data);
+};
+
+const MyHashTagDecorator = (props: any) => {
+  return (
+    <span
+      style={{
+        color: '#3F51B5',
+      }}
+    >
+      {props.children}
+    </span>
+  );
+};
+
+const MyAtDecorator = (props: any) => {
+  const customUrl = 'http://myulr/mention/' + props.decoratedText;
+  return (
+    <a
+      onClick={() => (window.location.href = customUrl)}
+      style={{
+        color: 'green',
+        cursor: 'pointer',
+      }}
+    >
+      {props.children}
+    </a>
+  );
+};
+
+const MyAmpersand: FunctionComponent<any> = (props) => {
+  // const { blockProps } = props
+  console.log('props', props);
+  console.log(
+    'props'
+    // props.customStyleFn({
+    //   fontSize: '30px',
+    // })
+  );
+  //   props.customStyleFn = {
+  //   };
+  return <span>&</span>;
+};
+
+const Editor = () => {
+  const ref = useRef<TMUIRichTextEditorRef>(null);
+
+  const insertAmpersand = () => {
+    ref.current?.insertAtomicBlockSync('c-ampersand', '&');
   };
   return (
-    <div>
-      <MUIRichTextEditor
-        label="Start typing..."
-        onSave={save}
-        // inlineToolbar={true}
-        controls={['my-style']}
-        customControls={[
-          {
-            name: 'my-style',
-            icon: <InvertColorsIcon />,
-            type: 'inline',
-            inlineStyle: {
-              backgroundColor: 'red',
-              color: 'white',
+    <>
+      <div
+        style={{
+          height: '400px',
+          width: '80%',
+          margin: 'auto',
+          border: '1px solid black',
+        }}
+      >
+        <MUIRichTextEditor
+          label=""
+          ref={ref}
+          controls={['title', 'bold', 'underline', 'my-style']}
+          customControls={[
+            {
+              name: 'c-ampersand',
+              type: 'atomic',
+              atomicComponent: MyAmpersand,
             },
-          },
-        ]}
-      />
-    </div>
+            {
+              name: 'my-style',
+              icon: <InvertColorsIcon />,
+              type: 'inline',
+              inlineStyle: {
+                backgroundColor: 'black',
+                color: 'white',
+              },
+            },
+          ]}
+        />
+      </div>
+
+      <Button onClick={insertAmpersand}>Insert "&"</Button>
+    </>
   );
-}
+};
+
+export default Editor;
