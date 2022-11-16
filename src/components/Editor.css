@@ -1,0 +1,40 @@
+div.DraftEditor-root {
+  border: 1px solid #000;
+  height: 150px;
+  width: 100%;
+  overflow-y: auto;
+  border-radius: 20px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+div.DraftEditor-editorContainer,
+div.public-DraftEditor-content {
+  height: 100%;
+}
+
+.editor-wrapper {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  width: 80%;
+  min-width: 80px;
+  max-width: 600px;
+}
+.editor-btn {
+  align-self: flex-end;
+  background-color: #003eff;
+  border: none;
+  padding: 8px 35px;
+  border-radius: 20px;
+  color: #fff;
+  margin-top: 20px;
+  cursor: pointer;
+  font-size: 12px;
+}

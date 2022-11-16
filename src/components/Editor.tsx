@@ -1,99 +1,61 @@
-import React, { FunctionComponent, useRef } from 'react';
-import MUIRichTextEditor, {
-  TMUIRichTextEditorRef,
-  TAsyncAtomicBlockResponse,
-} from 'mui-rte';
-import { Button, Typography } from '@mui/material';
-import InvertColorsIcon from '@mui/icons-material/InvertColors';
-import AbcTwoTone from '@mui/icons-material/AbcTwoTone';
+import { Editor, EditorState, Modifier } from 'draft-js';
+import 'draft-js/dist/Draft.css';
+import React, { ReactElement } from 'react';
+import './Editor.css';
 
-const save = (data: string) => {
-  console.log(data);
-};
-
-const MyHashTagDecorator = (props: any) => {
-  return (
-    <span
-      style={{
-        color: '#3F51B5',
-      }}
-    >
-      {props.children}
-    </span>
+const MyEditor = (): ReactElement => {
+  const [editorState, setEditorState] = React.useState(
+    EditorState.createEmpty()
   );
-};
 
-const MyAtDecorator = (props: any) => {
-  const customUrl = 'http://myulr/mention/' + props.decoratedText;
-  return (
-    <a
-      onClick={() => (window.location.href = customUrl)}
-      style={{
-        color: 'green',
-        cursor: 'pointer',
-      }}
-    >
-      {props.children}
-    </a>
-  );
-};
-
-const MyAmpersand: FunctionComponent<any> = (props) => {
-  // const { blockProps } = props
-  console.log('props', props);
-  console.log(
-    'props'
-    // props.customStyleFn({
-    //   fontSize: '30px',
-    // })
-  );
-  //   props.customStyleFn = {
-  //   };
-  return <span>&</span>;
-};
-
-const Editor = () => {
-  const ref = useRef<TMUIRichTextEditorRef>(null);
+  const onChange = (editorState: any) => {
+    setEditorState(editorState);
+  };
 
   const insertAmpersand = () => {
-    ref.current?.insertAtomicBlockSync('c-ampersand', '&');
+    let contentState = editorState.getCurrentContent();
+    const selectionState = editorState.getSelection();
+    const contentStateWithEntity = contentState.createEntity(
+      'MY_ENTITY_TYPE',
+      'IMMUTABLE'
+    );
+
+    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+    contentState = Modifier.insertText(
+      contentState,
+      selectionState,
+      '&',
+      undefined,
+      entityKey
+    );
+
+    let newState = EditorState.push(
+      editorState,
+      contentState,
+      'insert-characters'
+    );
+    if (!newState.getCurrentContent().equals(editorState.getCurrentContent())) {
+      const sel = newState.getSelection();
+      const updatedSelection = sel.merge({
+        anchorOffset: sel.getAnchorOffset(),
+        focusOffset: sel.getAnchorOffset(),
+      });
+      newState = EditorState.forceSelection(newState, updatedSelection);
+    }
+
+    setEditorState(newState);
   };
   return (
-    <>
-      <div
-        style={{
-          height: '400px',
-          width: '80%',
-          margin: 'auto',
-          border: '1px solid black',
-        }}
-      >
-        <MUIRichTextEditor
-          label=""
-          ref={ref}
-          controls={['title', 'bold', 'underline', 'my-style']}
-          customControls={[
-            {
-              name: 'c-ampersand',
-              type: 'atomic',
-              atomicComponent: MyAmpersand,
-            },
-            {
-              name: 'my-style',
-              icon: <InvertColorsIcon />,
-              type: 'inline',
-              inlineStyle: {
-                backgroundColor: 'black',
-                color: 'white',
-              },
-            },
-          ]}
-        />
-      </div>
+    <div className="editor-wrapper">
+      <div className="editor-container">
+        <Editor editorState={editorState} onChange={onChange} />
 
-      <Button onClick={insertAmpersand}>Insert "&"</Button>
-    </>
+        <button onClick={insertAmpersand} className="editor-btn">
+          Insert "&"
+        </button>
+      </div>
+    </div>
   );
 };
 
-export default Editor;
+export default MyEditor;
